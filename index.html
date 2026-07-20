@@ -20,17 +20,8 @@ html, body {
   background: #fce4ec;
 }
  
-/* ── Wrapper que mantém a proporção da imagem de fundo ── */
-/*
-  Ajuste --img-ratio para a proporção real das suas imagens.
-  Exemplos:
-    9/16  → celular vertical  (padrão aqui)
-    3/4   → retrato clássico
-    1/1   → quadrado
-    16/9  → paisagem
-*/
 :root {
-  --img-ratio: 9 / 16;
+  --img-ratio: 37 / 80;
 }
  
 .stage {
@@ -46,7 +37,7 @@ html, body {
   position: relative;
   /* ocupa o máximo possível mantendo a proporção */
   aspect-ratio: var(--img-ratio);
-  width: min(100%, calc(100vh * 9 / 16));
+  width: min(100%, calc(100vh * 37 / 80));
   height: auto;
   max-height: 100%;
 }
@@ -61,6 +52,18 @@ html, body {
   background-position: center;
   border-radius: 4px;
   overflow: hidden;
+}
+/* Imagem de fundo via <img> para controle total */
+.screen-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
 }
  
 .active {
@@ -84,13 +87,12 @@ button {
 }
  
 .btn-open {
-  /* centralizado horizontalmente, perto do rodapé */
+  /* centralizado horizontalmente, sobre o texto "Clique para abrir" */
   left: 50%;
   transform: translateX(-50%);
-  bottom: -2%;
-  width: 55%;
-  height: 8%;
-  
+  bottom: 5%;
+  width: 60%;
+  height: 12%;
 }
  
 /* ===== TELA 2 ===== */
