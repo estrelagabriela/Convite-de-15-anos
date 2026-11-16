@@ -21,7 +21,7 @@ html, body {
 }
  
 :root {
-  --img-ratio: 37 / 80;
+  --img-ratio: 2 / 3;
 }
  
 .stage {
@@ -37,9 +37,10 @@ html, body {
   position: relative;
   /* ocupa o máximo possível mantendo a proporção */
   aspect-ratio: var(--img-ratio);
-  width: min(100%, calc(100vh * 37 / 80));
+  width: min(100%, calc(100vh * 2 / 3));
   height: auto;
   max-height: 100%;
+  container-type: inline-size;
 }
  
 /* TELAS */
@@ -81,6 +82,41 @@ button {
   min-height: 44px;
 }
  
+/* ===== VÍDEO DE ENTRADA ===== */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #fce4ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+}
+.intro.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.intro video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.intro-btn {
+  position: absolute;
+  bottom: 5%;
+  padding: 10px 20px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(4px);
+  color: #c2185b;
+  font-size: 1em;
+  font-family: Georgia, serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.intro-skip  { right: 5%; }
+.intro-sound { left: 5%; display: none; }
+
 /* ===== TELA 1 ===== */
 #screen1 {
   background-image: url('imagemfundo01.jpeg');
@@ -90,9 +126,9 @@ button {
   /* centralizado horizontalmente, sobre o texto "Clique para abrir" */
   left: 50%;
   transform: translateX(-50%);
-  bottom: 5%;
-  width: 60%;
-  height: 12%;
+  top: 66%;
+  width: 46%;
+  height: 8%;
 }
  
 /* ===== TELA 2 ===== */
@@ -100,19 +136,47 @@ button {
   background-image: url('imagemfundo02.jpeg');
 }
  
-/* Os três botões ficam lado a lado na mesma altura.
-   Ajuste bottom/left/width conforme a sua arte. */
+/* Os quatro botões ficam lado a lado, cobrindo ícone + legenda.
+   Ajuste top/left/width conforme a sua arte. */
 .btn-whatsapp,
 .btn-maps,
+.btn-dress,
 .btn-gifts {
-  bottom: 25%;
-  height: 9%;
-  width: 13%;
+  top: 65%;
+  height: 13%;
+  width: 15%;
 }
  
-.btn-whatsapp { left: 18%; }
-.btn-maps     { left: 44%; }
-.btn-gifts    { left: 69%; }
+.btn-whatsapp { left: 14%; }
+.btn-maps     { left: 33.5%; }
+.btn-dress    { left: 50.5%; width: 17%; }
+.btn-gifts    { left: 71%; }
+
+/* Texto sobreposto: prazo de confirmação (cobre o "até 01/02" da arte) */
+.rsvp-deadline {
+  position: absolute;
+  left: 22%;
+  width: 56%;
+  top: 88%;
+  height: 2.8%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fbe2e7;
+  /* bordas suaves para se misturar com o fundo */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  color: #c2185b;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.15cqw;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ===== TELA 4 ===== */
+#screen4 {
+  background-image: url('imagemfundo04.jpeg');
+}
  
 /* ===== TELA 3 ===== */
 #screen3 {
@@ -147,6 +211,15 @@ button { outline: 2px solid red !important; }
  
 <body>
  
+<div id="intro" class="intro">
+  <video id="introVideo" src="videodeentrada.mp4" playsinline muted preload="auto"></video>
+  <button id="introSound" class="intro-btn intro-sound">&#128266; Ativar som</button>
+  <button id="introSkip" class="intro-btn intro-skip">Pular &#8250;</button>
+</div>
+ 
+<!-- Música de fundo: toca em loop durante o vídeo e em todas as telas do convite -->
+<audio id="bgMusic" src="vidssave.com%20Jesus%20Meu%20Esposo%20-%20Instrumental%2048KBPS.mp3" loop preload="auto"></audio>
+
 <div class="stage">
   <div class="screen-wrapper">
  
@@ -167,10 +240,17 @@ button { outline: 2px solid red !important; }
         aria-label="Ver local no mapa">
       </button>
  
+      <button class="btn-dress"
+        onclick="goTo(4)"
+        aria-label="Ver informações sobre o traje">
+      </button>
+ 
       <button class="btn-gifts"
         onclick="goTo(3)"
         aria-label="Ver lista de presentes">
       </button>
+
+      <div class="rsvp-deadline">Por favor confirmar presença até 13/01</div>
     </div>
  
     <!-- TELA 3 -->
@@ -178,10 +258,73 @@ button { outline: 2px solid red !important; }
       <button class="btn-back" onclick="goTo(2)" aria-label="Voltar">&#8592;</button>
     </div>
  
+    <!-- TELA 4 -->
+    <div id="screen4" class="screen">
+      <button class="btn-back" onclick="goTo(2)" aria-label="Voltar">&#8592;</button>
+    </div>
+ 
   </div>
 </div>
  
 <script>
+const intro = document.getElementById('intro');
+const introVideo = document.getElementById('introVideo');
+const introSound = document.getElementById('introSound');
+let introDone = false;
+
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.8;
+
+// Tenta tocar a música; navegadores podem bloquear som antes de um toque do usuário
+function playMusic() {
+  if (!bgMusic.paused) return Promise.resolve();
+  return bgMusic.play().then(() => {
+    introSound.style.display = 'none';
+  });
+}
+
+// No primeiro toque/clique em qualquer lugar, garante que a música comece
+function unlockMusic() {
+  playMusic().catch(() => {});
+}
+['pointerdown', 'touchstart', 'click', 'keydown'].forEach(evt =>
+  document.addEventListener(evt, unlockMusic, { passive: true })
+);
+
+// Ao voltar para o convite (ex.: depois de abrir WhatsApp ou Maps), retoma a música
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) playMusic().catch(() => {});
+});
+
+// O vídeo toca (sem som próprio) enquanto a música toca; ao terminar, mostra a tela 1
+function startIntro() {
+  introVideo.currentTime = 0;
+  introVideo.muted = true;
+  introVideo.play().catch(endIntro);
+  playMusic().catch(() => {
+    // Autoplay com som bloqueado: mostra o botão para ativar a música
+    introSound.style.display = 'block';
+  });
+}
+
+function endIntro() {
+  if (introDone) return;
+  introDone = true;
+  introVideo.pause();
+  goTo(1);
+  intro.classList.add('hide');
+  setTimeout(() => intro.remove(), 700);
+}
+
+introVideo.addEventListener('ended', endIntro);
+introVideo.addEventListener('error', endIntro);
+document.getElementById('introSkip').addEventListener('click', endIntro);
+introSound.addEventListener('click', () => {
+  playMusic().catch(() => {});
+});
+
+window.addEventListener('DOMContentLoaded', startIntro);
+
 function goTo(screen) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   document.getElementById('screen' + screen).classList.add('active');
