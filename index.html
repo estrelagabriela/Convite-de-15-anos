@@ -162,26 +162,23 @@ button {
 .btn-dress    { left: 50.5%; width: 17%; }
 .btn-gifts    { left: 71%; }
 
-/* Texto sobreposto: prazo de confirmação (cobre o "até 01/02" da arte) */
+/* Faixa vazia: esconde a linha "Confirmar presença até 13/01" da arte */
 .rsvp-deadline {
   position: absolute;
-  left: 22%;
-  width: 56%;
-  top: 88%;
-  height: 2.8%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 21%;
+  width: 58%;
+  top: 84.6%;
+  height: 4.3%;
   background: #fbe2e7;
-  /* bordas suaves para se misturar com o fundo */
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-  color: #c2185b;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 2.15cqw;
-  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
+                      linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  -webkit-mask-composite: source-in;
+          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
+                      linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+          mask-composite: intersect;
   pointer-events: none;
 }
+
 
 /* ===== TELA 4 ===== */
 #screen4 {
@@ -237,14 +234,14 @@ button { outline: 2px solid red !important; }
   <div class="screen-wrapper">
  
     <!-- TELA 1 -->
-    <div id="screen1" class="screen active">
+    <div id="screen1" class="screen">
       <div class="art">
         <button class="btn-open" onclick="goTo(2)" aria-label="Abrir convite"></button>
       </div>
     </div>
  
     <!-- TELA 2 -->
-    <div id="screen2" class="screen">
+    <div id="screen2" class="screen active">
       <div class="art">
       <button class="btn-whatsapp"
         onclick="window.open('https://wa.me/+559492094696')"
@@ -266,7 +263,7 @@ button { outline: 2px solid red !important; }
         aria-label="Ver lista de presentes">
       </button>
 
-      <div class="rsvp-deadline">Por favor confirmar presença até 13/01</div>
+      <div class="rsvp-deadline"></div>
       </div>
     </div>
  
@@ -330,7 +327,7 @@ function endIntro() {
   if (introDone) return;
   introDone = true;
   introVideo.pause();
-  goTo(1);
+  goTo(2);
   intro.classList.add('hide');
   setTimeout(() => intro.remove(), 700);
 }
