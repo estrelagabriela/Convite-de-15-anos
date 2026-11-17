@@ -162,23 +162,6 @@ button {
 .btn-dress    { left: 50.5%; width: 17%; }
 .btn-gifts    { left: 71%; }
 
-/* Faixa vazia: esconde a linha "Confirmar presença até 13/01" da arte */
-.rsvp-deadline {
-  position: absolute;
-  left: 21%;
-  width: 58%;
-  top: 84.6%;
-  height: 4.3%;
-  background: #fbe2e7;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
-                      linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
-  -webkit-mask-composite: source-in;
-          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
-                      linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
-          mask-composite: intersect;
-  pointer-events: none;
-}
-
 
 /* ===== TELA 4 ===== */
 #screen4 {
@@ -262,8 +245,6 @@ button { outline: 2px solid red !important; }
         onclick="goTo(3)"
         aria-label="Ver lista de presentes">
       </button>
-
-      <div class="rsvp-deadline"></div>
       </div>
     </div>
  
